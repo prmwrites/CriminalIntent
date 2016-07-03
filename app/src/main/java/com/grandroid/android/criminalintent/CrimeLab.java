@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.grandroid.android.criminalintent.database.CrimeBaseHelper;
+import com.grandroid.android.criminalintent.database.CrimeCursorWrapper;
 import com.grandroid.android.criminalintent.database.CrimeDbSchema;
 
 import java.util.ArrayList;
@@ -40,12 +41,36 @@ public class CrimeLab {
     }
 
     public List<Crime> getCrimes() {
-        return new ArrayList<>();
+        List<Crime> crimes = new ArrayList<>();
+
+        CrimeCursorWrapper cursor = queryCrimes(null, null);
+
+        try {
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                crimes.add(cursor.getCrime());
+                cursor.moveToNext();
+            }
+        } finally {
+            cursor.close();
+        }
+        return crimes;
     }
 
     public Crime getCrime(UUID id) {
+        CrimeCursorWrapper cursor = queryCrimes(CrimeDbSchema.CrimeTable.Cols.UUID + " = ?", new String[] {id.toString() }
+        );
 
-        return null;
+        try {
+            if (cursor.getCount() == 0) {
+                return null;
+            }
+
+            cursor.moveToFirst();
+            return cursor.getCrime();
+        } finally {
+            cursor.close();
+        }
     }
 
     public void updateCrime(Crime crime) {
@@ -65,7 +90,7 @@ public class CrimeLab {
         return values;
     }
 
-    private Cursor queryCrimes(String whereClause, String[] whereArgs) {
+    private CrimeCursorWrapper queryCrimes(String whereClause, String[] whereArgs) {
         Cursor cursor = mDatabase.query(CrimeDbSchema.CrimeTable.NAME,
                 null, // Columns - null selects all columns
                 whereClause,
@@ -75,6 +100,6 @@ public class CrimeLab {
                 null // orderBy
         );
 
-        return cursor;
+        return new CrimeCursorWrapper(cursor);
     }
 }
