@@ -7,19 +7,22 @@ import java.util.UUID;
  * Created by Patrick on 6/28/2016.
  */
 public class Crime {
-    private UUID mID;
+    private UUID mId;
     private String mTitle;
     private Date mDate;
     private boolean mSolved;
 
     public Crime() {
-        // Generate unique identifier
-        mID = UUID.randomUUID();
+        this(UUID.randomUUID());
+    }
+
+    public Crime(UUID id) {
+        mId = id;
         mDate = new Date();
     }
 
     public UUID getId() {
-        return mID;
+        return mId;
     }
 
     public String getTitle() {
